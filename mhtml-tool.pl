@@ -226,6 +226,10 @@ sub debug_msg {
 sub read_next_line {
     my $cur_line = <>;
     chomp $cur_line;
+    if ( $cur_line =~ /\r$/ ) {
+        debug_msg("It's a CRLF file") if ( $crlf_file == 0 );
+        $crlf_file++;
+    }
     $cur_line =~ s/\r//;
     return $cur_line;
 }
@@ -239,20 +243,13 @@ sub parse_headers {
     my %headers;
     my $sep = $/;
     $/ = $orig_sep;
-    my $full_line = "";
-    my $cur_line  = <>;    # don't use read_next_line so we can look for \r
-                           # check line ending
-    if ( $cur_line =~ /\r$/ ) {
-        debug_msg("It's a CRLF file");
-        $crlf_file = 1;
-    }
-    chomp $cur_line;
-    $cur_line =~ s/\r//;
-    $full_line = $cur_line;
+    my $cur_line  = &read_next_line;
+    my $full_line = $cur_line;
 
     while ( not( $cur_line =~ /^$/ ) ) {
         if ( $cur_line =~ /;$/ ) {    # if a continued line...
             while ( ( $cur_line = &read_next_line ) =~ /^\h+/ ) {
+                $cur_line =~ s/^\h+//;
                 $full_line = $full_line . " " . $cur_line;
             }
             if ( $full_line =~ s/^([-\w]+): (.*)$// ) {
@@ -311,7 +308,6 @@ my @htmlfiles;
 my $fh;
 
 {
-    #$_ = <>;
     my $fileind = 1;
     while ( defined( my $data = <> ) ) {
         chomp $data;

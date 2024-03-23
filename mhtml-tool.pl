@@ -27,16 +27,24 @@ files referring to requisites are rewritten to point to the saved files.
 
 =over
 
-=item B<-h>, B<-?>, B<--help>
+=item B<-h>
+
+=item B<-?>
+
+=item B<--help>
 
 Print a brief usage summary.
 
-=item B<-l>, B<--list>
+=item B<-l>
+
+=item B<--list>
 
 List archive contents instead of unpacking.  Four columns are output: file
 name, MIME type, size and URL.  Unavailable entries are replaced by "(?)".
 
-=item B<-o> I<directory/ or name>, B<--output> I<directory/ or name>
+=item B<-o> I<directory/ or name>
+
+=item B<--output> I<directory/ or name>
 
 If the argument ends in a slash or is an existing directory, unpack to that
 directory instead of current directory.  Otherwise the argument is taken as a
@@ -243,11 +251,9 @@ sub parse_headers {
     $full_line = $cur_line;
 
     while ( not( $cur_line =~ /^$/ ) ) {
-        if ( $cur_line =~ /^\h+/ ) {    # if a continued line...
-            while ( $cur_line =~ /^\h+/ ) {
+        if ( $cur_line =~ /;$/ ) {    # if a continued line...
+            while ( ( $cur_line = &read_next_line ) =~ /^\h+/ ) {
                 $full_line = $full_line . " " . $cur_line;
-                $cur_line  = read_next_line();
-                next;
             }
             if ( $full_line =~ s/^([-\w]+): (.*)$// ) {
                 $headers{$1} = $2;

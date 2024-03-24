@@ -70,6 +70,9 @@ modified under the same terms as Perl.
 B<mhtml-tool> is Copyright (c) 2018 Tudor M. Pristavu. It may be copied and/or
 modified under the same terms as Perl.
 
+B<mhtml-tool> is Copyright (c) 2024 Thomas E. Dickey. It may be copied and/or
+modified under the same terms as Perl.
+
 =cut
 
 use File::Path;

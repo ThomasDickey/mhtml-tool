@@ -311,9 +311,13 @@ my $fh;
 
 {
     my $fileind = 1;
+    my $leading = "--$boundary\n";
     while ( defined( my $data = <> ) ) {
         chomp $data;
         $data =~ s/\R/\n/g;   # handle various other line-endings (windows, mac)
+        while ( index( $data, $leading ) == 0 ) {
+            $data = substr( $data, length($leading) );
+        }
         my %headers;
         while ( $data =~ s/^([-\w]+): (.*)\n// ) {
             $headers{$1} = $2;

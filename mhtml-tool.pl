@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+$| = 1;
+
 =pod
 
 =head1 NAME

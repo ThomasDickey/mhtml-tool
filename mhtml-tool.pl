@@ -245,12 +245,12 @@ sub parse_headers {
     my %headers;
     my $sep = $/;
     $/ = $orig_sep;
-    my $cur_line  = &read_next_line;
+    my $cur_line  = read_next_line;
     my $full_line = $cur_line;
 
     while ( not( $cur_line =~ /^$/ ) ) {
         if ( $cur_line =~ /;$/ ) {    # if a continued line...
-            while ( ( $cur_line = &read_next_line ) =~ /^\h+/ ) {
+            while ( ( $cur_line = read_next_line ) =~ /^\h+/ ) {
                 $cur_line =~ s/^\h+//;
                 $full_line = $full_line . " " . $cur_line;
             }
@@ -265,7 +265,7 @@ sub parse_headers {
                 debug_msg("(2) New header $1 with value $2");
             }
         }
-        $cur_line  = read_next_line();
+        $cur_line  = read_next_line;
         $full_line = $cur_line;
     }
     $/ = $sep;

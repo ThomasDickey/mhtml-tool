@@ -29,6 +29,19 @@ files referring to requisites are rewritten to point to the saved files.
 
 =over
 
+=item B<-e> program
+
+=item B<--exec> program
+
+Unpack the archive into a temporary directory and execute the given program
+in that directory, passing the primary HTML (first text/html entry) of the
+archive as a parameter.
+
+If B<-o> is given, use that directory location with the program.
+
+If the program is "lynx" or "(e)links(2)", this script uses the "-force-html"
+option to help when the entrypoint lacks a ".html" file-suffix.
+
 =item B<-h>
 
 =item B<-?>
@@ -58,6 +71,8 @@ directory does not exist, it is created.
 
 =head1 SEE ALSO
 
+https://github.com/ThomasDickey/mhtml-tool
+
 https://github.com/clapautius/mhtml-tool
 
 http://www.volkerschatz.com/unix/uware/unmht.html
@@ -75,9 +90,11 @@ modified under the same terms as Perl.
 
 =cut
 
+use Cwd;
 use File::Path;
 use File::Copy;
 use File::Glob;
+use File::Temp qw/ tempdir /;
 use URI;
 use MIME::Base64;
 use MIME::QuotedPrint;
@@ -193,7 +210,7 @@ sub mkfiledir {
 }
 
 my %opt;
-my @optdescr = ( 'output|o=s', 'list|l!', 'help|h|?!', 'debug|d!' );
+my @optdescr = ( 'exec|e=s', 'output|o=s', 'list|l!', 'help|h|?!', 'debug|d!' );
 my %config;
 
 my $status = GetOptions( \%opt, @optdescr );
@@ -208,6 +225,7 @@ taken for the primary web page, and all other contained files are written to a
 directory named after that HTML file.
 
 Options:
+-e, --exec    Execute the given program on a temporarily-unpacked archive
 -l, --list    List archive contents (file name, MIME type, size and URL)
 -o, --output  Unpack to directory <dir/> or to file <name>.html
 
@@ -215,6 +233,13 @@ Use the command "pod2man mhtml-tool > mhtml-tool.1" or
 "pod2html mhtml-tool > mhtml-tool.html" to extract the manual.
 EOF
     exit !$status;
+}
+
+my $origin  = getcwd;
+my $tempdir = "";
+if ( $opt{exec} and not defined $opt{output} ) {
+    $tempdir = tempdir( CLEANUP => 1 );
+    $opt{output} = $tempdir . "/";
 }
 
 my $orig_sep  = $/;
@@ -439,6 +464,7 @@ if ( $opt{list} ) {
 
 mkfiledir( $opt{output}, $htmlfiles[0]->{fname}, 0, \%config );
 
+my $entrypoint  = ".";
 my $filesprefix = $config{filesdir} . "/";
 my $outname     = $config{firstout};
 print "primary html output name: $outname\n";
@@ -480,8 +506,22 @@ for my $html (@htmlfiles) {
     open $fh, ">$outname" or abort "Could not create file $outname.";
     print $fh $linksubst;
     close $fh;
+    $entrypoint = $outname if ( $entrypoint eq "." );
 
     # for all except the first HTML file:
     $filesprefix = "";
     $outname     = undef;
 }
+
+if ( $tempdir ne "" ) {
+    chdir $tempdir;
+    my $enforce = "";
+    $enforce = "-force-html"
+      if (  $entrypoint ne "."
+        and $entrypoint !~ /\.htm(l)?$/
+        and $opt{exec}  =~ /(lynx|((e)?links(2)?))/ );
+    system( sprintf( "%s %s %s", $opt{exec}, $enforce, $entrypoint ) );
+    chdir $origin;
+}
+
+1;

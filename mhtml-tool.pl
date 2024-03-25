@@ -405,6 +405,8 @@ my $fh;
             }
         }
 
+        $origname = "noname" unless defined $origname;
+        $origname = "noname" if ( $origname eq "" );
         my $fname = unique_name( $origname, $ARGV[0] );
         if ( !defined( $headers{"Content-Transfer-Encoding"} ) ) {
             print STDERR "Info: Encoding of ", ordinal($fileind),

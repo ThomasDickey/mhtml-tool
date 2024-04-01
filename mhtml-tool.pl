@@ -102,6 +102,26 @@ use HTML::PullParser;
 use HTML::Tagset;
 use Getopt::Long;
 
+our %shorten_path;
+
+# RFC 7230 (obsoletes RFC 2616) indicates that URI length is limited by the
+# server line-length, which it suggests should be at least 8000 octets.  The
+# problem is that components of pathnames might be limited to 255 bytes, while
+# the URI components can be much longer.  As an additional complication, the
+# too-long components can be both directory- and file-names, and truncating
+# the components can produce collisions.
+sub shorten_path {
+    my $actual = $_[0];
+    if ( not defined $shorten_path{$actual} ) {
+        my @parts = split /\//, $actual;
+        for my $n ( 0 .. $#parts ) {
+            $parts[$n] = substr( $parts[$n], 0, 255 );
+        }
+        $shorten_path{$actual} = join "/", @parts;
+    }
+    return $shorten_path{$actual};
+}
+
 # Add approriate ordinal suffix to a number.
 # -> Number
 # <- String of number with ordinal suffix
@@ -448,7 +468,7 @@ my $fh;
         }
         else {
             mkfiledir( $opt{output}, $htmlfiles[0]->{fname}, 1, \%config );
-            $fname = "$config{filespath}/$fname";
+            $fname = shorten_path "$config{filespath}/$fname";
             open $fh, ">$fname" or abort "Could not create file $fname.";
             print $fh $data;
             close $fh;
@@ -505,6 +525,7 @@ for my $html (@htmlfiles) {
         }
     }
     $outname = "$config{filespath}/$html->{fname}" unless defined $outname;
+    $outname = shorten_path $outname;
     open $fh, ">$outname" or abort "Could not create file $outname.";
     print $fh $linksubst;
     close $fh;

@@ -102,6 +102,7 @@ use HTML::PullParser;
 use HTML::Tagset;
 use Getopt::Long;
 
+our $path_limit = 255;
 our %shorten_path;
 
 # RFC 7230 (obsoletes RFC 2616) indicates that URI length is limited by the
@@ -115,7 +116,7 @@ sub shorten_path {
     if ( not defined $shorten_path{$actual} ) {
         my @parts = split /\//, $actual;
         for my $n ( 0 .. $#parts ) {
-            $parts[$n] = substr( $parts[$n], 0, 255 );
+            $parts[$n] = substr( $parts[$n], 0, $path_limit );
         }
         $shorten_path{$actual} = join "/", @parts;
     }
@@ -204,6 +205,7 @@ sub mkfiledir {
     $$out{firstout} = "$$out{toppath}/$firsthtmlname";
     $$out{filesdir} = $firsthtmlname;
     $$out{filesdir} =~ s/\.[^.]+$//;
+    $$out{filesdir} = substr($$out{filesdir}, 0, $path_limit - 6);
     $$out{filesdir} .= "_files";
     $$out{filespath} = "$$out{toppath}/$$out{filesdir}";
     if ( defined $prevfilespath ) {

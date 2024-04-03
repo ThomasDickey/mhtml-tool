@@ -123,6 +123,15 @@ sub shorten_path {
     return $shorten_path{$actual};
 }
 
+# URLs can include "&" and other characters which require quoting to use in
+# a shell command.  We use system() rather than exec() to allow the temporary
+# directory to be cleaned up after running lynx.
+sub quoted {
+    my $param = $_[0];
+    $param =~ s/'/'\"'\"'/g;
+    return sprintf( "'%s'", $param );
+}
+
 # Add approriate ordinal suffix to a number.
 # -> Number
 # <- String of number with ordinal suffix
@@ -205,9 +214,10 @@ sub mkfiledir {
     $$out{firstout} = "$$out{toppath}/$firsthtmlname";
     $$out{filesdir} = $firsthtmlname;
     $$out{filesdir} =~ s/\.[^.]+$//;
-    $$out{filesdir} = substr($$out{filesdir}, 0, $path_limit - 6);
+    $$out{filesdir} = substr( $$out{filesdir}, 0, $path_limit - 6 );
     $$out{filesdir} .= "_files";
     $$out{filespath} = "$$out{toppath}/$$out{filesdir}";
+
     if ( defined $prevfilespath ) {
         return unless $prevfilespath ne $$out{filespath};
         return unless -d $prevfilespath;
@@ -545,7 +555,7 @@ if ( $tempdir ne "" ) {
       if (  $entrypoint ne "."
         and $entrypoint !~ /\.htm(l)?$/
         and $opt{exec}  =~ /(lynx|((e)?links(2)?))/ );
-    system( sprintf( "%s %s %s", $opt{exec}, $enforce, $entrypoint ) );
+    system( sprintf( "%s %s %s", $opt{exec}, $enforce, quoted $entrypoint ) );
     chdir $origin;
 }
 

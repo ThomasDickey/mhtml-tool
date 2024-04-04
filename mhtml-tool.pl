@@ -467,6 +467,10 @@ my $fh;
             $headers{url} = $headers{"Content-Location"};
             $headers{url} =~ s/\s+$//;
             $by_url{ $headers{url} } = \%headers;
+            debug_msg("Content-Location: $headers{url}");
+        }
+        else {
+            debug_msg("?? no location");
         }
         if ( $type eq "text/html" ) {
             $headers{data} = $data;
@@ -520,6 +524,8 @@ for my $html (@htmlfiles) {
         {
             for my $attr (@linkattrs) {
                 my $uri = URI->new( $tok->[1]->{$attr} );
+                next unless defined $uri;
+                next unless defined $html->{url};
                 $uri = $uri->abs( $html->{url} );
                 $tok->[1]->{$attr} =
                   "$filesprefix" . $by_url{ $uri->as_string() }->{fname}

@@ -1,5 +1,8 @@
+mhtml-tool / unmht
+==================
+
 Description
-===========
+-----------
 
 Perl script for listing, unpacking, viewing .mht / .mhtml files (MIME-encoded
 HTML archives).
@@ -7,9 +10,9 @@ HTML archives).
 Based on [unmht](http://www.volkerschatz.com/unix/uware/unmht.html).
 
 Usage
-=====
+-----
 
-`mhtml-tool [ -l | --list | -o <dir/ or name> | --output <dir/ or name> ] <MHT file>`
+`mhtml-tool [ -e <program> | -l | -o <dir/ or name> ] <MHT file>`
 
 By default, unpack an MHTML archive (an archive type saved by some browsers)
 to the current directory.  The first HTML file in the archive is taken for the
@@ -21,7 +24,7 @@ temporary copy of the archive.
 
 Options:
 
- * -e, --exec    Unpack in temporary directory, run program there.
+ * -e, --exec    Unpack in temporary directory, run *&lt;program&gt;* there.
  * -l, --list    List archive contents (filename, MIME-type, size, URL)
  * -o, --output  Unpack to directory *&lt;dir/&gt;* or to file *&lt;name&gt;*.html
 
